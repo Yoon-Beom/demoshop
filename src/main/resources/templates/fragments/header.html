@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!-- 
+    ===============================
+    [ HEADER 프래그먼트 정의 파일 ]
+    ===============================
+    - th:fragment="header"로 정의하여 다른 템플릿에서 재사용
+    - 예시: <th:block th:replace="~{fragments/header::header}"></th:block>
+-->
+
+<th:block th:fragment="header">
+    <!-- ===============================
+         [ 상단 고정 네비게이션 바 ]
+         =============================== -->
+    <header>
+        <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+            <div class="container-fluid">
+
+                <!-- ===== [ 사이트 로고/이름 ] ===== -->
+                <a class="navbar-brand" href="/">Ezen Mall</a>
+
+                <!-- ===== [ 모바일 메뉴 토글 버튼 ] ===== -->
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
+                        aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- ===== [ 네비게이션 메뉴 영역 ] ===== -->
+                <div class="collapse navbar-collapse" id="navbarCollapse">
+                    <ul class="navbar-nav me-auto mb-2 mb-md-0">
+
+                        <!-- --- [ 항상 보이는 Home 메뉴 ] --- -->
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="/">Home</a>
+                        </li>
+
+                        <!-- --- [ 로그인 전(비회원) 메뉴 ] --- -->
+                        <th:block th:if="${session.login_auth == null}">
+                            <li class="nav-item">
+                                <a class="nav-link active" aria-current="page" href="/member/login">LOGIN</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link active" aria-current="page" href="/member/join">JOIN</a>
+                            </li>
+                        </th:block>
+
+                        <!-- --- [ 로그인 후(회원) 메뉴 ] --- -->
+                        <th:block th:if="${session.login_auth != null}">
+                            <li class="nav-item">
+                                <a class="nav-link active" aria-current="page" href="/member/logout">LOGOUT</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link active" aria-current="page" href="/member/modify">MODIFY</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link active" aria-current="page" href="/member/mypage">MYPAGE</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link active" aria-current="page" href="/cart/cart_list">CART</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link active" aria-current="page" href="/order/order_list">ORDER</a>
+                            </li>
+                        </th:block>
+                    </ul>
+
+                    <!-- ===== [ 검색 폼 ] ===== -->
+                    <form class="d-flex" role="search">
+                        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                        <button class="btn btn-outline-success" type="submit">Search</button>
+                    </form>
+                </div>
+            </div>
+        </nav>
+    </header>
+</th:block>
+</html>

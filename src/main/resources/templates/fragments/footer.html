@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!-- 
+    footer 프래그먼트 정의 파일
+    - th:fragment="footer"로 정의하여 다른 템플릿에서 재사용 가능
+    - 예시: <th:block th:replace="~{fragments/footer::footer}"></th:block>
+-->
+<th:block th:fragment="footer">
+    <!-- 고정(Sticky) 푸터 영역 -->
+    <footer class="footer mt-auto py-3 bg-body-tertiary">
+        <div class="container">
+            <span class="text-body-secondary">
+                Place sticky footer content here.
+            </span>
+        </div>
+    </footer>
+</th:block>
+</html>

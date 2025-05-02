@@ -6,15 +6,17 @@
     ===============================
     - th:fragment="header"로 정의하여 다른 템플릿에서 재사용
     - 예시: <th:block th:replace="~{fragments/header::header}"></th:block>
+    - 프래그먼트(fragment)는 Thymeleaf에서 반복적으로 사용하는 템플릿 조각을 의미합니다.
+    - 공식 문서: https://www.thymeleaf.org/doc/tutorials/3.1/usingthymeleaf.html#template-layout
 -->
 
 <th:block th:fragment="header">
     <!-- ===============================
          [ 상단 고정 네비게이션 바 ]
          =============================== -->
-    <header>
-        <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-            <div class="container-fluid">
+	<header>
+		<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+			<div class="container-fluid">
 
                 <!-- ===== [ 사이트 로고/이름 ] ===== -->
                 <a class="navbar-brand" href="/">Ezen Mall</a>
@@ -50,7 +52,7 @@
                                 <a class="nav-link active" aria-current="page" href="/member/logout">LOGOUT</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link active" aria-current="page" href="/member/modify">MODIFY</a>
+                            	<a class="nav-link active" aria-current="page" href="/member/modify">MODIFY</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link active" aria-current="page" href="/member/mypage">MYPAGE</a>
@@ -70,8 +72,8 @@
                         <button class="btn btn-outline-success" type="submit">Search</button>
                     </form>
                 </div>
-            </div>
-        </nav>
-    </header>
+			</div>
+		</nav>
+	</header>
 </th:block>
 </html>

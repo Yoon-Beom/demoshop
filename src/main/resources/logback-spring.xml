@@ -1,28 +1,62 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration debug="true">
+    <!--
+        logback-spring.xml: 스프링 부트에서 사용하는 로그백(Logback) 설정 파일
+        공식 문서: https://logback.qos.ch/manual/configuration.html
+        debug="true"로 설정하면, 로그백 설정 과정에서 발생하는 상세 정보를 콘솔에 출력합니다.
+    -->
 
-    <!-- Appenders -->
+    <!-- =========================
+         Appender(로그 출력 방식) 정의
+         ========================= -->
+
+    <!-- 기본 콘솔 로그(Appender) : 로그 메시지를 콘솔에 출력 -->
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <charset>UTF-8</charset>
+            <!-- 로그 출력 패턴: 날짜, 로그레벨, 로거명, 메시지 -->
             <Pattern>%d %5p [%c] %m%n</Pattern>
         </encoder>
     </appender>
 
+    <!-- SQL 등 별도 Info 로그용 콘솔 Appender -->
     <appender name="console-infolog" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <charset>UTF-8</charset>
+            <!-- 로그 출력 패턴: 날짜, 로그레벨, 메시지 (로거명 제외) -->
             <Pattern>%d %5p %m%n</Pattern>
         </encoder>
     </appender>
 
-    <!-- Logger : 아래 구문으로 콘솔에 로그의 종류를 제어할 수가 있다.-->
+    <!-- =========================
+         Logger(로그 레벨 및 Appender 지정)
+         ========================= -->
+
+    <!--
+        com.docmall 패키지의 로그 레벨을 DEBUG로 설정
+        - 개발 중 상세 로그를 확인할 때 유용
+    -->
     <logger name="com.docmall" level="DEBUG" appender-ref="console" />
+
+    <!--
+        log4jdbc에서 사용하는 로거 설정
+        - jdbc.sqlonly : 실제 실행된 SQL만 출력 (INFO 레벨)
+        - jdbc.sqltiming : SQL 실행 시간 로그 (OFF로 비활성화)
+        - jdbc.resultsettable : 쿼리 결과 테이블 형태로 출력 (INFO 레벨)
+        - 각각 별도의 Appender(console-infolog)로 출력
+    -->
     <logger name="jdbc.sqlonly" level="INFO" appender-ref="console-infolog" />
     <logger name="jdbc.sqltiming" level="OFF" appender-ref="console-infolog" />
     <logger name="jdbc.resultsettable" level="INFO" appender-ref="console-infolog" />
 
-    <!-- Root Logger -->
+    <!-- =========================
+         Root Logger(전체 기본 설정)
+         ========================= -->
+
+    <!--
+        전체 애플리케이션의 기본 로그 레벨을 INFO로 설정
+        - 별도 지정이 없는 모든 로그는 console Appender로 출력
+    -->
     <root level="info">
         <appender-ref ref="console" />
     </root>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.docmall.basic.member.MemberMapper">
+    <!--
+        ============================
+        [ MyBatis 매퍼 XML 설명 ]
+        ============================
+        - 이 파일은 MemberMapper 인터페이스와 매핑되는 SQL 쿼리를 정의합니다.
+        - namespace는 MemberMapper 인터페이스의 전체 경로(패키지명 포함)와 일치시켜야 합니다.
+          (예: com.docmall.basic.member.MemberMapper)
+        - 공식 문서: https://mybatis.org/mybatis-3/ko/sqlmap-xml.html
+    -->
+
+    <!--
+        ============================
+        [ 아이디 중복 체크 쿼리 ]
+        ============================
+        - id: "idCheck" → MemberMapper 인터페이스의 idCheck 메서드와 연결됨
+        - parameterType: String → 파라미터로 String(아이디)을 받음
+        - resultType: String → 결과로 String(아이디) 반환
+        - #{mbsp_id} → 파라미터 바인딩(입력값이 mbsp_id로 들어옴)
+        - 사용 예시:
+            String id = memberMapper.idCheck("testid");
+        - 반환값: 해당 아이디가 존재하면 아이디(String), 없으면 null
+    -->
+    <select id="idCheck" parameterType="String" resultType="String">
+        select 
+            mbsp_id 
+        from 
+            mbsp_tbl 
+        where 
+            mbsp_id = #{mbsp_id}
+    </select>
+    
+    <!--
+        ============================
+        [ 회원 가입(INSERT) 쿼리 ]
+        ============================
+        - id: "join" → MemberMapper 인터페이스의 join 메서드와 연결됨
+        - parameterType: com.docmall.basic.member.MemberVO → 회원 정보 객체를 파라미터로 받음
+        - #{필드명} → MemberVO 객체의 필드 값이 바인딩됨
+        - 사용 예시:
+            memberMapper.join(memberVO);
+        - 반환값: insert된 행 수(int, MyBatis 기본 반환)
+    -->
+    <insert id="join" parameterType="com.docmall.basic.member.MemberVO">
+        insert into 
+            mbsp_tbl
+                (mbsp_id, mbsp_name, mbsp_email, mbsp_password, mbsp_zipcode, mbsp_addr, mbsp_deaddr, mbsp_phone, mbsp_nick, mbsp_receive)
+        values
+            (#{mbsp_id}, #{mbsp_name}, #{mbsp_email}, #{mbsp_password}, #{mbsp_zipcode}, #{mbsp_addr}, #{mbsp_deaddr}, #{mbsp_phone}, #{mbsp_nick}, #{mbsp_receive})
+    </insert>
+</mapper>

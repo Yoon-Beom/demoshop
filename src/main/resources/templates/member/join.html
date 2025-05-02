@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}">
+<!--
+    [Thymeleaf Layout Dialect]를 사용하여 layouts/layout.html을 상속받는 회원가입 페이지입니다.
+    공식 문서: https://ultraq.github.io/thymeleaf-layout-dialect/
+-->
+
+<!-- 확장 포인트: 자식 템플릿에서 script, css를 추가할 수 있는 영역 -->
+<th:block layout:fragment="script">
+
+<!-- =========================
+     Daum 우편번호 서비스 스크립트
+     ========================= -->
+<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<script>
+    // 우편번호 찾기 레이어 element
+    var element_layer = document.getElementById('layer');
+
+    // 레이어 닫기 함수
+    function closeDaumPostcode() {
+        element_layer.style.display = 'none';
+    }
+
+    // Daum 우편번호 서비스 실행 함수
+    function sample2_execDaumPostcode() {
+        new daum.Postcode({
+            oncomplete: function(data) {
+                // 주소 데이터 조합 및 입력 필드에 값 세팅
+                var addr = '';
+                var extraAddr = '';
+
+                if (data.userSelectedType === 'R') { // 도로명 주소
+                    addr = data.roadAddress;
+                } else { // 지번 주소
+                    addr = data.jibunAddress;
+                }
+
+                if(data.userSelectedType === 'R'){
+                    if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)){
+                        extraAddr += data.bname;
+                    }
+                    if(data.buildingName !== '' && data.apartment === 'Y'){
+                        extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+                    }
+                    if(extraAddr !== ''){
+                        extraAddr = ' (' + extraAddr + ')';
+                    }
+                    document.getElementById("sample2_extraAddress").value = extraAddr;
+                } else {
+                    document.getElementById("sample2_extraAddress").value = '';
+                }
+
+                document.getElementById('sample2_postcode').value = data.zonecode;
+                document.getElementById("sample2_address").value = addr;
+                document.getElementById("sample2_detailAddress").focus();
+                element_layer.style.display = 'none';
+            },
+            width : '100%',
+            height : '100%',
+            maxSuggestItems : 5
+        }).embed(element_layer);
+
+        element_layer.style.display = 'block';
+        initLayerPosition();
+    }
+
+    // 레이어를 화면 중앙에 위치시키는 함수
+    function initLayerPosition(){
+        var width = 300;
+        var height = 400;
+        var borderWidth = 5;
+        element_layer.style.width = width + 'px';
+        element_layer.style.height = height + 'px';
+        element_layer.style.border = borderWidth + 'px solid';
+        element_layer.style.left = (((window.innerWidth || document.documentElement.clientWidth) - width)/2 - borderWidth) + 'px';
+        element_layer.style.top = (((window.innerHeight || document.documentElement.clientHeight) - height)/2 - borderWidth) + 'px';
+    }
+</script>          
+
+<!-- =========================
+     회원가입 관련 jQuery 스크립트
+     ========================= -->
+<script>
+    $(document).ready(function() {
+
+        // 아이디 중복체크, 이메일 인증 여부 플래그
+        let id_check = false;
+        let email_auth = false;
+        
+        // 아이디 중복 체크 버튼 클릭 이벤트
+        $("#btnIDCheck").on("click", function() {
+            let mbsp_id = $("#mbsp_id");
+            if(mbsp_id.val() == "") {
+                alert("아이디를 입력하세요");
+                return;
+            }
+
+            // AJAX로 서버에 아이디 중복 체크 요청
+            $.ajax({
+                url : '/member/idCheck',
+                type: 'get',
+                data: {mbsp_id: mbsp_id.val()},
+                dataType: 'text',
+                success : function(result) {
+                    if(result == "yes") {
+                        alert("사용가능");
+                        id_check = true; 
+                    }else {
+                        alert("사용불가능");
+                        mbsp_id.val("");
+                        mbsp_id.focus();
+                    }
+                }
+            });
+        });
+
+        // 메일 인증 요청 버튼 클릭 이벤트
+        $("#btnMailAuthcode").on("click", function() {
+            if($("#mbsp_email").val() == "") {
+                alert("메일을 입력하세요.");
+                return;
+            }
+
+            // AJAX로 인증코드 발송 요청
+            $.ajax({
+                url: '/email/authcode',
+                type: 'get',
+                data : {receiverMail : $("#mbsp_email").val(), type : "authcode"},
+                dataType : 'text',
+                success : function(result) {
+                    if(result == "success") {
+                        alert("메일로 인증코드가 발급되었습니다.");
+                    }
+                }
+            });
+        });
+
+        // 인증확인 버튼 클릭 이벤트
+        $("#btnConfirmAuth").on("click", function() {
+            if($("#u_authcode").val() == "") {
+                alert("인증코드를 입력하세요.");
+                return;
+            }
+
+            // AJAX로 인증코드 확인 요청
+            $.ajax({
+                url: '/email/confirm_authcode',
+                type: 'get',
+                data : {authcode : $("#u_authcode").val()},
+                dataType : 'text',
+                success : function(result) {
+                    if(result == "success") {
+                        alert("인증이 확인되었습니다.");
+                        email_auth = true;
+                    }else if(result == "fail") {
+                        alert("인증코드가 틀립니다. \n다시 확인 또는 인증코드 재발급해주세요.");
+                    }
+                }
+            });
+        });
+
+        // 회원가입 버튼 클릭 이벤트
+        $("#btnJoin").on("click", function() {
+            let joinForm = $("#joinForm");
+
+            // 아이디 중복체크 확인
+            if(id_check == false) {
+                alert("아이디 중복확인바랍니다.")
+                return;
+            }
+            // 메일 인증 확인
+            if(email_auth == false) {
+                alert("메일 인증확인바랍니다.");
+                return;
+            }
+            // 폼 제출
+            joinForm.submit();
+        });
+    });
+</script>
+
+</th:block>
+<th:block layout:fragment="css"></th:block>
+
+<!-- =========================
+     메인 컨텐츠 영역
+     ========================= -->
+<th:block layout:fragment="content">
+    <h1 class="mt-3 mb-4 text-center">Register</h1>
+    <div class="row">
+        <div class="col">
+            <div class="card card-info">
+                <div class="card-header">
+                    <h3 class="card-title">Join Form</h3>
+                </div>
+                <!-- =========================
+                     회원가입 폼
+                     ========================= -->
+                <form class="form-horizontal" id="joinForm" action="/member/join" method="post">
+                    <div class="card-body">
+                        <!-- 아이디 입력 및 중복확인 -->
+                        <div class="form-group row mb-3">
+                            <label for="mbsp_id" class="col-sm-2 col-form-label">아이디</label>
+                            <div class="col-sm-4">
+                                <input type="text" class="form-control" id="mbsp_id" name="mbsp_id" placeholder="아이디 입력">
+                            </div>
+                            <div class="col-sm-4">
+                                <button type="button" class="btn btn-outline-primary" id="btnIDCheck">ID Check</button>
+                            </div>
+                            <span class="col-sm-2" id="idCheckMsg" style="color: red;"></span>
+                        </div>
+                        <!-- 비밀번호, 비밀번호 확인 -->
+                        <div class="form-group row mb-3">
+                            <label for="mbsp_password" class="col-sm-2 col-form-label">비밀번호</label>
+                            <div class="col-sm-4">
+                                <input type="password" class="form-control" id="mbsp_password" name="mbsp_password" placeholder="비밀번호 입력">
+                            </div>
+                            <label for="mbsp_password_2" class="col-sm-2 col-form-label">비밀번호 확인</label>
+                            <div class="col-sm-4">
+                                <input type="password" class="form-control" id="mbsp_password_2" placeholder="비밀번호 확인">
+                            </div>
+                        </div>
+                        <!-- 이름, 별명 -->
+                        <div class="form-group row mb-3">
+                            <label for="mbsp_name" class="col-sm-2 col-form-label">이름</label>
+                            <div class="col-sm-4">
+                                <input type="text" class="form-control" id="mbsp_name" name="mbsp_name" placeholder="이름입력">
+                            </div>
+                            <label for="mbsp_nick" class="col-sm-2 col-form-label">별명</label>
+                            <div class="col-sm-4">
+                                <input type="text" class="form-control" id="mbsp_nick" name="mbsp_nick" placeholder="별명입력">
+                            </div>
+                        </div>
+                        <!-- 이메일, 인증코드 요청/확인 -->
+                        <div class="form-group row mb-3">
+                            <label for="mbsp_email" class="col-sm-2 col-form-label">전자우편</label>
+                            <div class="col-sm-3">
+                                <input type="text" class="form-control" id="mbsp_email" name="mbsp_email" placeholder="전자우편입력">
+                            </div>
+                            <div class="col-sm-2">
+                                <button type="button" class="btn btn-outline-primary" id="btnMailAuthcode">메일인증요청</button>
+                            </div>
+                            <div class="col-sm-3">
+                                <input type="text" class="form-control" id="u_authcode" placeholder="인증코드 입력하세요.">
+                            </div>
+                            <div class="col-sm-2">
+                                <button type="button" class="btn btn-outline-primary" id="btnConfirmAuth">인증확인</button>
+                            </div>
+                        </div>
+                        <!-- 우편번호, 주소 -->
+                        <div class="form-group row mb-3">
+                            <label for="mbsp_zipcode" class="col-sm-2 col-form-label">우편번호</label>
+                            <div class="col-sm-4">
+                                <input type="text" class="form-control" id="sample2_postcode" name="mbsp_zipcode" placeholder="우편번호 입력">
+                            </div>
+                            <div class="col-sm-4">
+                                <button type="button" class="btn btn-outline-primary" onclick="sample2_execDaumPostcode()">우편번호</button>
+                            </div>
+                        </div>
+                        <div class="form-group row mb-3">
+                            <label for="mbsp_addr" class="col-sm-2 col-form-label">기본주소</label>
+                            <div class="col-sm-4">
+                                <input type="text" class="form-control" id="sample2_address" name="mbsp_addr" placeholder="기본주소 입력">
+                            </div>
+                            <label for="mbsp_deaddr" class="col-sm-2 col-form-label">나머지 주소</label>
+                            <div class="col-sm-4">
+                                <input type="text" class="form-control" id="sample2_detailAddress" name="mbsp_deaddr" placeholder="나머지 주소입력">
+                                <input type="hidden" id="sample2_extraAddress" placeholder="참고항목">
+                            </div>
+                        </div>
+                        <!-- 연락처, 메일수신 동의 -->
+                        <div class="form-group row mb-3">
+                            <label for="mbsp_phone" class="col-sm-2 col-form-label">연락처</label>
+                            <div class="col-sm-4">
+                                <input type="text" class="form-control" id="mbsp_phone" name="mbsp_phone" placeholder="연락처 입력">
+                            </div>
+                            <label for="mbsp_receive" class="col-sm-2 col-form-label">메일수신</label>
+                            <div class="col-sm-4">
+                                <input class="form-check-input" type="checkbox" id="mbsp_receive" name="mbsp_receive" value="Y">
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 폼 하단 버튼 영역 -->
+                    <div class="card-footer text-center">
+                        <button type="button" class="btn btn-info" id="btnJoin">Sign up</button>
+                        <button type="reset" class="btn btn-default float-right">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Daum 우편번호 서비스 레이어(팝업) -->
+    <div id="layer" style="display:none;position:fixed;overflow:hidden;z-index:1;-webkit-overflow-scrolling:touch;">
+        <img src="//t1.daumcdn.net/postcode/resource/images/close.png" id="btnCloseLayer"
+             style="cursor:pointer;position:absolute;right:-3px;top:-3px;z-index:1"
+             onclick="closeDaumPostcode()" alt="닫기 버튼">
+    </div>
+</th:block>
+</html>

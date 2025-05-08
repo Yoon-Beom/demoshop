@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layouts/ad_layout}">
+<!--
+    Thymeleaf Layout Dialect를 사용하여 admin/layouts/ad_layout.html을 부모 레이아웃으로 상속받는 관리자 메뉴 페이지입니다.
+    공식 문서: https://ultraq.github.io/thymeleaf-layout-dialect/
+-->
+
+<!-- =========================
+     메인 컨텐츠(관리자 메뉴)
+     ========================= -->
+<th:block layout:fragment="content">
+    관리자 메뉴
+</th:block>
+</html>

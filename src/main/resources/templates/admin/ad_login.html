@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!--
+    관리자 로그인 페이지 템플릿입니다.
+    - Thymeleaf를 사용하여 서버에서 동적으로 메시지를 처리합니다.
+    - AdminLTE 스타일을 참고한 간단한 로그인 폼 구조입니다.
+-->
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>AdminLTE 2 | Starter</title>
+    <!-- 반응형 웹을 위한 뷰포트 설정 -->
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+
+    <!-- 관리자 로그인 전용 CSS -->
+    <link rel="stylesheet" href="/css/admin/adLogin.css">
+
+    <!--
+        서버에서 전달된 msg 변수에 따라 로그인 실패 메시지를 알림창으로 표시합니다.
+        - 'idfail': 아이디 오류
+        - 'pwfail': 비밀번호 오류
+        - Thymeleaf의 th:inline="javascript"를 사용하여 안전하게 변수 삽입
+    -->
+    <script th:inline="javascript">
+        let msg = [[${msg}]];
+        if(msg == 'idfail') {
+            alert("아이디를 확인하세요");
+        } else if(msg == 'pwfail') {
+            alert("비밀번호를 확인하세요");
+        }
+    </script>
+</head>
+
+<body>
+    <div class="main">
+        <div class="container">
+            <div style="text-align: center;">
+                <div class="middle">
+
+                    <!-- 로그인 폼 시작 -->
+                    <div id="login">
+                        <form action="/admin/admin_ok" method="post">
+                            <fieldset class="clearfix">
+                                <p>
+                                    <span class="fa fa-user"></span>
+                                    <input type="text" name="ad_userid" value="admin" placeholder="Username" required>
+                                </p> <!-- IE 지원을 위한 JS; placeholder 속성 권장 -->
+                                <p>
+                                    <span class="fa fa-lock"></span>
+                                    <input type="password" name="ad_passwd" value="1234" placeholder="Password" required>
+                                </p> <!-- IE 지원을 위한 JS; placeholder 속성 권장 -->
+                                <div>
+                                    <span style="width:48%; text-align:left; display: inline-block;">
+                                        <a class="small-text" href="#">Forgot password?</a>
+                                    </span>
+                                    <span style="width:50%; text-align:right; display: inline-block;">
+                                        <input type="submit" value="Sign In">
+                                    </span>
+                                </div>
+                            </fieldset>
+                            <div class="clearfix"></div>
+                        </form>
+                        <div class="clearfix"></div>
+                    </div> <!-- end login -->
+
+                    <!-- 로고 영역 -->
+                    <div class="logo">LOGO
+                        <div class="clearfix"></div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

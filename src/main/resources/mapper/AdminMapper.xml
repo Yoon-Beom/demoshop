@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.docmall.basic.admin.AdminMapper">
+    <!--
+        ============================
+        [ MyBatis 매퍼 XML 설명 ]
+        ============================
+        - 이 파일은 AdminMapper 인터페이스와 매핑되는 SQL 쿼리를 정의합니다.
+        - namespace는 매퍼 인터페이스의 전체 경로(패키지명 포함)와 일치시켜야 합니다.
+        - 공식 문서: https://mybatis.org/mybatis-3/ko/sqlmap-xml.html
+    -->
+
+    <!--
+        ============================
+        [ 관리자 로그인 정보 조회 쿼리 ]
+        ============================
+        - id: "admin_ok" → AdminMapper 인터페이스의 admin_ok 메서드와 연결됨
+        - 파라미터: #{ad_userid} (관리자 아이디)
+        - resultType: com.docmall.basic.admin.AdminDto (조회 결과를 매핑할 DTO)
+        - 반환값: 관리자 정보(아이디, 비밀번호, 최근 로그인일)
+    -->
+    <select id="getAdminById" resultType="com.docmall.basic.admin.AdminDTO">
+        select 
+            ad_userid, ad_passwd, login_date
+        from 
+            admin_tbl
+        where
+            ad_userid = #{ad_userid}
+    </select>
+</mapper>

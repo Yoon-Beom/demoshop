@@ -42,5 +42,65 @@ public class MemberService {
         memberMapper.join(vo);
     }
 
-    // TODO: 회원 정보 조회, 수정, 삭제 등 추가 비즈니스 로직을 필요에 따라 구현하세요.
+    /**
+     * 회원 로그인: 아이디로 회원 정보를 조회합니다.
+     *
+     * @param mbsp_id 로그인할 회원의 아이디
+     * @return 해당 아이디의 회원 정보(MemberVO), 없으면 null
+     */
+    public MemberVO login(String mbsp_id) {
+        return memberMapper.login(mbsp_id);
+    }
+
+    /**
+     * 회원정보 수정 화면에 출력할 회원 정보를 조회합니다.
+     *
+     * @param mbsp_id 회원 아이디
+     * @return 회원 정보(MemberVO)
+     */
+    public MemberVO modify(String mbsp_id) {
+        return memberMapper.modify(mbsp_id);
+    }
+
+    /**
+     * 회원정보 수정 내용을 저장합니다.
+     *
+     * @param vo 수정할 회원 정보(MemberVO)
+     */
+    public void modify_save(MemberVO vo) {
+        memberMapper.modify_save(vo);
+    }
+
+    /**
+     * 비밀번호를 변경합니다.
+     *
+     * @param mbsp_id       회원 아이디
+     * @param mbsp_password 변경할(암호화된) 비밀번호
+     */
+    public void pwchange(String mbsp_id, String mbsp_password) {
+        memberMapper.pwchange(mbsp_id, mbsp_password);
+    }
+
+    /**
+     * 이름과 이메일로 아이디를 찾습니다.
+     *
+     * @param mbsp_name  회원 이름
+     * @param mbsp_email 회원 이메일
+     * @return 찾은 아이디(String), 없으면 null
+     */
+    public String idsearch(String mbsp_name, String mbsp_email) {
+        return memberMapper.idsearch(mbsp_name, mbsp_email);
+    }
+
+    /**
+     * 임시 비밀번호 발급을 위해 아이디와 이메일이 일치하는지 확인합니다.
+     *
+     * @param mbsp_id    회원 아이디
+     * @param mbsp_email 회원 이메일
+     * @return 일치하면 "success", 불일치하면 "fail" 등
+     */
+    public String pwtemp_confirm(String mbsp_id, String mbsp_email) {
+        return memberMapper.pwtemp_confirm(mbsp_id, mbsp_email);
+    }
+
 }

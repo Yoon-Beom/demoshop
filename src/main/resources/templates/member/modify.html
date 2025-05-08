@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}">
+<!--
+    Thymeleaf Layout Dialect를 사용하여 layouts/layout.html을 상속받는 회원정보 수정 페이지입니다.
+    공식 문서: https://ultraq.github.io/thymeleaf-layout-dialect/
+-->
+
+<!-- 확장 포인트: script, css 필요시 여기에 추가 -->
+<th:block layout:fragment="script">
+
+<!-- =========================
+     Daum 우편번호 서비스 스크립트
+     ========================= -->
+<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<script>
+    // 우편번호 찾기 레이어 element
+    var element_layer = document.getElementById('layer');
+
+    // 레이어 닫기 함수
+    function closeDaumPostcode() {
+        element_layer.style.display = 'none';
+    }
+
+    // Daum 우편번호 서비스 실행 함수
+    function sample2_execDaumPostcode() {
+        new daum.Postcode({
+            oncomplete: function(data) {
+                // 주소 데이터 조합 및 입력 필드에 값 세팅
+                var addr = '';
+                var extraAddr = '';
+
+                if (data.userSelectedType === 'R') { // 도로명 주소
+                    addr = data.roadAddress;
+                } else { // 지번 주소
+                    addr = data.jibunAddress;
+                }
+
+                if(data.userSelectedType === 'R'){
+                    if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)){
+                        extraAddr += data.bname;
+                    }
+                    if(data.buildingName !== '' && data.apartment === 'Y'){
+                        extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+                    }
+                    if(extraAddr !== ''){
+                        extraAddr = ' (' + extraAddr + ')';
+                    }
+                    document.getElementById("sample2_extraAddress").value = extraAddr;
+                } else {
+                    document.getElementById("sample2_extraAddress").value = '';
+                }
+
+                document.getElementById('sample2_postcode').value = data.zonecode;
+                document.getElementById("sample2_address").value = addr;
+                document.getElementById("sample2_detailAddress").focus();
+                element_layer.style.display = 'none';
+            },
+            width : '100%',
+            height : '100%',
+            maxSuggestItems : 5
+        }).embed(element_layer);
+
+        element_layer.style.display = 'block';
+        initLayerPosition();
+    }
+
+    // 레이어를 화면 중앙에 위치시키는 함수
+    function initLayerPosition(){
+        var width = 300;
+        var height = 400;
+        var borderWidth = 5;
+        element_layer.style.width = width + 'px';
+        element_layer.style.height = height + 'px';
+        element_layer.style.border = borderWidth + 'px solid';
+        element_layer.style.left = (((window.innerWidth || document.documentElement.clientWidth) - width)/2 - borderWidth) + 'px';
+        element_layer.style.top = (((window.innerHeight || document.documentElement.clientHeight) - height)/2 - borderWidth) + 'px';
+    }
+</script>          
+
+<!-- =========================
+     회원정보수정 폼 제출 스크립트
+     ========================= -->
+<script>
+    $(document).ready(function() {
+        // "Modify Save" 버튼 클릭 시 폼 제출
+        $("#btnModify").on("click", function() {
+            $("#modifyForm").submit();
+        });
+    });
+</script>
+
+</th:block>
+<th:block layout:fragment="css"></th:block>
+
+<!-- =========================
+     메인 컨텐츠 영역
+     ========================= -->
+<th:block layout:fragment="content">
+    <h1 class="mt-3 mb-4 text-center">Modify</h1>
+    <div class="row">
+        <div class="col">
+            <div class="card card-info">
+                <div class="card-header">
+                    <h3 class="card-title">Modify Form</h3>
+                </div>
+                <!-- =========================
+                     회원정보 수정 폼
+                     ========================= -->
+                <form class="form-horizontal" id="modifyForm" action="/member/modify" method="post">
+                    <div class="card-body">
+                        <!-- 아이디(읽기전용), 가입일 -->
+                        <div class="form-group row mb-3">
+                            <label for="mbsp_id" class="col-sm-2 col-form-label">아이디</label>
+                            <div class="col-sm-4">
+                                <input type="text" class="form-control" id="mbsp_id" name="mbsp_id"
+                                       th:value="${memberVO.mbsp_id}" readonly>
+                            </div>
+                            <label for="mbsp_datesub" class="col-sm-2 col-form-label">가입일</label>
+                            <div class="col-sm-4">
+                                <span th:text="${#dates.format(memberVO.mbsp_datesub, 'yyyy-MM-dd HH:mm:ss')}"></span>
+                            </div>
+                        </div>
+                        <!-- 이름, 수정일 -->
+                        <div class="form-group row mb-3">
+                            <label for="mbsp_name" class="col-sm-2 col-form-label">이름</label>
+                            <div class="col-sm-4">
+                                <input type="text" class="form-control" id="mbsp_name" name="mbsp_name"
+                                       th:value="${memberVO.mbsp_name}">
+                            </div>
+                            <label for="mbsp_updatedate" class="col-sm-2 col-form-label">수정일</label>
+                            <div class="col-sm-4">
+                                <span th:text="${#dates.format(memberVO.mbsp_updatedate, 'yyyy-MM-dd HH:mm:ss')}"></span>
+                            </div>
+                        </div>
+                        <!-- 이메일, 별명 -->
+                        <div class="form-group row mb-3">
+                            <label for="mbsp_email" class="col-sm-2 col-form-label">전자우편</label>
+                            <div class="col-sm-4">
+                                <input type="text" class="form-control" id="mbsp_email" name="mbsp_email"
+                                       th:value="${memberVO.mbsp_email}">
+                            </div>
+                            <label for="mbsp_nick" class="col-sm-2 col-form-label">별명</label>
+                            <div class="col-sm-4">
+                                <input type="text" class="form-control" id="mbsp_nick" name="mbsp_nick"
+                                       th:value="${memberVO.mbsp_nick}">
+                            </div>
+                        </div>
+                        <!-- 우편번호, 주소 -->
+                        <div class="form-group row mb-3">
+                            <label for="mbsp_zipcode" class="col-sm-2 col-form-label">우편번호</label>
+                            <div class="col-sm-4">
+                                <input type="text" class="form-control" id="sample2_postcode" name="mbsp_zipcode"
+                                       th:value="${memberVO.mbsp_zipcode}">
+                            </div>
+                            <div class="col-sm-4">
+                                <button type="button" class="btn btn-outline-primary"
+                                        onclick="sample2_execDaumPostcode()">우편번호</button>
+                            </div>
+                        </div>
+                        <div class="form-group row mb-3">
+                            <label for="sample2_address" class="col-sm-2 col-form-label">기본주소</label>
+                            <div class="col-sm-4">
+                                <input type="text" class="form-control" id="sample2_address" name="mbsp_addr"
+                                       th:value="${memberVO.mbsp_addr}">
+                            </div>
+                            <label for="sample2_extraAddress" class="col-sm-2 col-form-label">나머지주소</label>
+                            <div class="col-sm-4">
+                                <input type="text" class="form-control" id="sample2_detailAddress" name="mbsp_deaddr"
+                                       th:value="${memberVO.mbsp_deaddr}">
+                                <input type="hidden" id="sample2_extraAddress" placeholder="참고항목">
+                            </div>
+                        </div>
+                        <!-- 연락처 -->
+                        <div class="form-group row mb-3">
+                            <label for="mbsp_phone" class="col-sm-2 col-form-label">연락처</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="mbsp_phone" name="mbsp_phone"
+                                       th:value="${memberVO.mbsp_phone}">
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 폼 하단 버튼 영역 -->
+                    <div class="card-footer text-center">
+                        <button type="button" class="btn btn-info" id="btnModify">Modify Save</button>
+                        <button type="reset" class="btn btn-default float-right">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Daum 우편번호 서비스 레이어(팝업) -->
+    <div id="layer" style="display:none;position:fixed;overflow:hidden;z-index:1;-webkit-overflow-scrolling:touch;">
+        <img src="//t1.daumcdn.net/postcode/resource/images/close.png" id="btnCloseLayer"
+             style="cursor:pointer;position:absolute;right:-3px;top:-3px;z-index:1"
+             onclick="closeDaumPostcode()" alt="닫기 버튼">
+    </div>
+</th:block>
+</html>

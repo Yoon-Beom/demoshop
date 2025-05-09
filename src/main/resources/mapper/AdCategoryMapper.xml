@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.docmall.basic.admin.category.AdCategoryMapper">
+    <!--
+        ============================
+        [ 1차 카테고리 목록 조회 ]
+        ============================
+        - cate_prtcode가 null인 경우(최상위 카테고리만)
+        - 반환: CategoryVO 리스트
+    -->
+    <select
+    	id="getFirstCategoryList"
+    	resultType="com.docmall.basic.admin.category.CategoryVO">
+        select 
+            cate_code, cate_prtcode, cate_name 
+        from 
+            category_tbl
+        where 
+            cate_prtcode is null
+    </select>
+
+    <!--
+        ============================
+        [ 2차 카테고리 목록 조회 ]
+        ============================
+        - 특정 1차 카테고리(cate_prt_code)에 속한 2차 카테고리만 조회
+        - 파라미터: cate_prt_code (Integer)
+        - 반환: CategoryVO 리스트
+    -->
+    <select
+    	id="getSecondCategoryList"
+    	parameterType="Integer"
+    	resultType="com.docmall.basic.admin.category.CategoryVO">
+        select
+            cate_code, cate_prtcode, cate_name 
+        from 
+            category_tbl
+        where 
+            cate_prtcode = #{cate_prt_code}
+    </select>
+
+    <!--
+        ============================
+        [ 2차 카테고리 코드로 해당 카테고리 정보 조회 ]
+        ============================
+        - 2차 카테고리(혹은 임의의 카테고리) 코드로 카테고리 정보 조회
+        - 파라미터: secondCategory (Integer)
+        - 반환: CategoryVO (1건)
+        - resultType 패키지 경로가 실제 VO 클래스와 일치하는지 반드시 확인!
+    -->
+    <select
+    	id="getFirstCategoryBySecondCategory"
+    	parameterType="int"
+    	resultType="com.docmall.basic.admin.category.CategoryVO">
+        select 
+            cate_code, cate_prtcode, cate_name 
+        from 
+            category_tbl
+        where 
+            cate_code = #{secondCategory}
+    </select>
+</mapper>
